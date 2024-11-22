@@ -992,9 +992,9 @@ class ParallelConfig:
         if current_platform.is_hpu() and self.world_size > 1:
             if self.distributed_executor_backend is None:
                 self.distributed_executor_backend = "ray"
-            if self.distributed_executor_backend != "ray":
-                raise ValueError(
-                    "HPU backend only supports Ray for distributed inference.")
+            # if self.distributed_executor_backend != "ray":
+            #     raise ValueError(
+            #         "HPU backend only supports Ray for distributed inference.")
 
         if self.distributed_executor_backend is None and self.world_size > 1:
             # We use multiprocessing by default if world_size fits on the

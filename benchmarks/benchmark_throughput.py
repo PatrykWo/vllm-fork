@@ -413,6 +413,10 @@ if __name__ == "__main__":
                         action='store_true',
                         default=False,
                         help="Disable decoupled async engine frontend.")
+    parser.add_argument("--pipeline_parallel_size",
+                        type=int,
+                        default=1,
+                        help="Piepeline parallel size.")
     parser = AsyncEngineArgs.add_cli_args(parser)
     args = parser.parse_args()
     if args.tokenizer is None:

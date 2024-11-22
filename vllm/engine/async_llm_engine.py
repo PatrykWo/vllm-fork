@@ -634,6 +634,10 @@ class AsyncLLMEngine(EngineClient):
                 initialize_ray_cluster(engine_config.parallel_config)
                 from vllm.executor.ray_hpu_executor import RayHPUExecutorAsync
                 executor_class = RayHPUExecutorAsync
+            elif distributed_executor_backend == "mp":
+                from vllm.executor.multiproc_hpu_executor import (
+                    MultiprocessingHPUExecutorAsync)
+                executor_class = MultiprocessingHPUExecutorAsync
             else:
                 from vllm.executor.hpu_executor import HPUExecutorAsync
                 executor_class = HPUExecutorAsync
