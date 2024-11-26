@@ -61,8 +61,8 @@ class HPUExecutor(ExecutorBase):
             distributed_init_method: Optional[str] = None) -> Dict:
         worker_kwargs = self._get_worker_kwargs(local_rank, rank,
                                                 distributed_init_method)
-        worker_kwargs.update(worker_module_name="vllm.worker.habana_worker",
-                             worker_class_name="HabanaWorker",)
+        worker_kwargs.update(worker_module_name="vllm.worker.hpu_worker",
+                             worker_class_name="HPUWorker",)
         return worker_kwargs
 
     def _create_worker(self,

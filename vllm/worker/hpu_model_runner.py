@@ -295,9 +295,44 @@ class HpuModelAdapter:
             kwargs['attn_metadata'], input_ids.size(0), input_ids.size(1),
             input_ids.device, self.dtype)
         LoraMask.setLoraMask(kwargs.pop('lora_mask'))
+        #print(f' Args: {args}')
+        #print(f' KWargs: {kwargs}')
+        '''
+        if get_pp_group().is_first_rank:
+            print("FIRST RANK")
+            hidden_states = self.model.get_input_embeddings(input_ids)
+            residual = None
+        else:
+            intermediate_tensors = kwargs['intermediate_tensors']
+            hidden_states = intermediate_tensors['hidden_states']
+            residual = intermediate_tensors['residual']
+        '''
         hidden_states = self.model(*args, **kwargs)
-        hidden_states = hidden_states.view(-1, hidden_states.shape[-1])
-        hidden_states = hidden_states.index_select(0, selected_token_indices)
+        if get_pp_group().is_last_rank:
+            print("LAST RANK")
+        #hidden_states = self.model(*args, **kwargs)
+        print("\n\n\n HIDDEN STATES = ", type(hidden_states), "\n\n\n")
+        if not get_pp_group().is_last_rank:
+            hidden_states.tensors['hidden_states'] = hidden_states.tensors['hidden_states'].view(-1, hidden_states.tensors['hidden_states'].shape[-1])
+        else:
+            hidden_states = hidden_states.view(-1, hidden_states.shape[-1])
+            hidden_states = hidden_states.index_select(0, selected_token_indices)
+        '''
+        if get_pp_group().is_first_rank:
+            hidden_states = self.model(*args, **kwargs)
+            print("\n\n\n HIDDEN STATES = ", type(hidden_states), "\n\n\n")
+            hidden_states = hidden_states.view(-1, hidden_states.shape[-1])
+            hidden_states = hidden_states.index_select(0, selected_token_indices)
+        else:
+            assert intermediate_tensors is not None
+            hidden_states = intermediate_tensors["hidden_states"]
+            residual = intermediate_tensors["residual"]
+        if not get_pp_group().is_last_rank:
+            return IntermediateTensors({
+                "hidden_states": hidden_states,
+                "residual": residual
+            })
+        '''
         return hidden_states
 
     def compute_logits(self, *args, **kwargs):
@@ -308,6 +343,9 @@ class HpuModelAdapter:
 
     def make_empty_intermediate_tensors(self, *args, **kwargs):
         return self.model.make_empty_intermediate_tensors(*args, **kwargs)
+    
+    def get_input_embeddings(self, input_ids: torch.Tensor) -> torch.Tensor:
+        return self.model.embed_tokens(input_ids)
 
     def generate_proposals(self, *args, **kwargs):
         return self.model.generate_proposals(*args, **kwargs)
@@ -1381,8 +1419,13 @@ class HPUModelRunnerBase(ModelRunnerBase[TModelInputForHPU]):
                 if not get_pp_group().is_first_rank:
                     intermediate_tensors = self.model.make_empty_intermediate_tensors(
                         batch_size=batch_size,
+                        context_size=seq_len,
                         dtype=self.model_config.dtype,
                         device=self.device)
+                print("\n\n\n")
+                print("seq len(seqs) = ", len(seqs))
+                print("seq_len = ", seq_len)
+                print("batch_size = ", batch_size)
                 self.execute_model(inputs, kv_caches, intermediate_tensors=intermediate_tensors, warmup_mode=True)
             else:  # decode with multi-step
                 inputs = dataclasses.replace(inputs,
@@ -2011,23 +2054,26 @@ class HPUModelRunner(HPUModelRunnerBase[ModelInputForHPUWithSamplingMetadata]):
                         **execute_model_kwargs,
                         selected_token_indices=sampling_metadata.
                         selected_token_indices)
-
+                
                 if self.lora_config:
                     LoraMask.setLoraMask(
                         lora_logits_mask.index_select(
                             0, sampling_metadata.selected_token_indices))
 
+                if not get_pp_group().is_last_rank:
+                    return hidden_states
+
                 # Compute the logits.
                 with self.profiler.record_event(
                         'internal',
                     ('compute_logits_'
-                     f'{"prompt" if is_prompt else "decode"}_bs'
-                     f'{batch_size}_'
-                     f'seq{seq_len}')):
+                    f'{"prompt" if is_prompt else "decode"}_bs'
+                    f'{batch_size}_'
+                    f'seq{seq_len}')):
                     if num_steps == 1:
                         sampling_metadata.selected_token_indices = None
                     logits = self.model.compute_logits(hidden_states,
-                                                       sampling_metadata)
+                                                            sampling_metadata)
                 htorch.core.mark_step()
                 # Only perform sampling in the driver worker.
                 if not self.is_driver_worker:
