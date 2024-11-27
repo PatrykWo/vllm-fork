@@ -308,10 +308,6 @@ class HpuModelAdapter:
             residual = intermediate_tensors['residual']
         '''
         hidden_states = self.model(*args, **kwargs)
-        if get_pp_group().is_last_rank:
-            print("LAST RANK")
-        #hidden_states = self.model(*args, **kwargs)
-        print("\n\n\n HIDDEN STATES = ", type(hidden_states), "\n\n\n")
         if not get_pp_group().is_last_rank:
             hidden_states.tensors['hidden_states'] = hidden_states.tensors['hidden_states'].view(-1, hidden_states.tensors['hidden_states'].shape[-1])
         else:
@@ -1414,22 +1410,26 @@ class HPUModelRunnerBase(ModelRunnerBase[TModelInputForHPU]):
             inputs = self.prepare_model_input(seqs)
             is_single_step = \
                 self.vllm_config.scheduler_config.num_scheduler_steps == 1
-            if is_prompt or is_single_step:
+            if is_single_step:
+                '''
                 intermediate_tensors = None
                 #seq_id = list(seqs.seq_data.keys())[0]
                 #seq_data = seqs.seq_data[seq_id]
                 #context_size = seq_data.get_num_computed_tokens()
+                
                 if not get_pp_group().is_first_rank:
                     intermediate_tensors = self.model.make_empty_intermediate_tensors(
                         batch_size=batch_size,
-                        context_size=seq_len,
+                        context_size=self._seq_len(inputs.attn_metadata) if is_prompt else 1,
                         dtype=self.model_config.dtype,
                         device=self.device)
                 print("\n\n\n")
+                print("self._seq_len = ", self._seq_len(inputs.attn_metadata))
                 print("seq len(seqs) = ", len(seqs))
                 print("seq_len = ", seq_len)
                 print("batch_size = ", batch_size)
-                self.execute_model(inputs, kv_caches, intermediate_tensors=intermediate_tensors, warmup_mode=True)
+                '''
+                self.execute_model(inputs, kv_caches, warmup_mode=True)
             else:  # decode with multi-step
                 inputs = dataclasses.replace(inputs,
                                              is_first_multi_step=True,
@@ -1993,7 +1993,14 @@ class HPUModelRunner(HPUModelRunnerBase[ModelInputForHPUWithSamplingMetadata]):
                 lora_mask, lora_logits_mask = self.create_lora_mask(
                     input_tokens, model_input.lora_ids,
                     attn_metadata.is_prompt)
-
+        
+            if not get_pp_group().is_first_rank:
+                    intermediate_tensors = self.model.make_empty_intermediate_tensors(
+                        batch_size=batch_size,
+                        context_size=seq_len if is_prompt else 1,
+                        dtype=self.model_config.dtype,
+                        device=self.device)
+            
             execute_model_kwargs = {
                 "input_ids": input_tokens,
                 "positions": input_positions,

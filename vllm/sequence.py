@@ -1084,7 +1084,9 @@ class IntermediateTensors:
 
     def __repr__(self) -> str:
         return f"IntermediateTensors(tensors={self.tensors})"
-
+    
+    def __hash__(self) -> int:
+        return hash(tuple(self.tensors.values()))
 
 class PoolerOutput(
         msgspec.Struct,
