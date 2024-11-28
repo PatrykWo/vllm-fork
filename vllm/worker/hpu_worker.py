@@ -259,8 +259,8 @@ class HPUWorker(LocalOrDistributedWorkerBase):
         self.model_runner.finish_measurements()
 
     @property
-    def do_metadata_broadcast(self) -> bool:
-        return self.parallel_config.tensor_parallel_size > 1
+    def do_metadata_broadcast(self) -> bool: 
+        return self.parallel_config.tensor_parallel_size > 1 or self.parallel_config.pipeline_parallel_size > 1
 
     @property
     def kv_cache(self) -> Optional[List[List[torch.Tensor]]]:
