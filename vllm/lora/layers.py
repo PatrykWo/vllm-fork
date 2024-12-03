@@ -1502,7 +1502,7 @@ class LogitsProcessorWithLoRA(BaseLayerWithLoRA):
                                                       neginf=float("-inf")))
         if current_platform.is_hpu():
             lora_logits = lora_logits[:logits.shape[0], :]
-        logits[:,
+        logits[:lora_logits.shape[0],
                self.base_layer.org_vocab_size:self.base_layer.org_vocab_size +
                lora_logits.shape[1]] = lora_logits
 
