@@ -51,7 +51,8 @@ class HPUExecutor(ExecutorBase):
             local_rank=local_rank,
             rank=rank,
             distributed_init_method=distributed_init_method,
-            is_driver_worker=rank == 0,
+            is_driver_worker=(not self.parallel_config)
+            or (rank % self.parallel_config.tensor_parallel_size == 0),
         )
     
     def _get_create_worker_kwargs(
