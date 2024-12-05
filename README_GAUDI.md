@@ -66,7 +66,7 @@ $ python setup.py develop
 
 #### 2. Build and Install the latest from vLLM-fork
 
-The latest features and performance optimizations are developed in Gaudi's [vLLM-fork](https://github.com/HabanaAI/vllm-fork) and we periodically upstream them to vLLM main repo. To install latest [HabanaAI/vLLM-fork](https://github.com/HabanaAI/vllm-fork), run the following:
+The latest features and performance optimizations are developed in Gaudi's [vLLM-fork](https://github.com/HabanaAI/vllm-fork) and we periodically upstream them to vLLM main repository. To install latest [HabanaAI/vLLM-fork](https://github.com/HabanaAI/vllm-fork), run the following:
 
 ```{.console}
 $ git clone https://github.com/HabanaAI/vllm-fork.git
