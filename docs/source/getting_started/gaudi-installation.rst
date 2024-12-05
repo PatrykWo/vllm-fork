@@ -69,17 +69,11 @@ Use the following commands to run a Docker image:
 Build and Install vLLM
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To build and install vLLM from source, run:
+Currently, we are providing multiple repositories which can be used to install vLLM with Intel® Gaudi®, pick one option:
 
-.. code:: console
+1. Build and Install the stable version
 
-   $ git clone https://github.com/vllm-project/vllm.git
-   $ cd vllm
-   $ pip install -r requirements-hpu.txt
-   $ python setup.py develop
-
-
-Currently, the latest features and performance optimizations are developed in Gaudi's `vLLM-fork <https://github.com/HabanaAI/vllm-fork>`__ and we periodically upstream them to vLLM main repo. To install latest `HabanaAI/vLLM-fork <https://github.com/HabanaAI/vllm-fork>`__, run the following:
+Periodically, we are releasing vLLM to allign with Intel® Gaudi® software releases. The stable version is released with a tagg, and supports fully validated features and performance optimizations in Gaudi's [vLLM-fork](https://github.com/HabanaAI/vllm-fork). To install the stable release from [HabanaAI/vLLM-fork](https://github.com/HabanaAI/vllm-fork), run the following:
 
 .. code:: console
 
@@ -89,6 +83,28 @@ Currently, the latest features and performance optimizations are developed in Ga
    $ pip install -r requirements-hpu.txt
    $ python setup.py develop
 
+2. Build and Install the latest from vLLM-fork
+
+The latest features and performance optimizations are developed in Gaudi's [vLLM-fork](https://github.com/HabanaAI/vllm-fork) and we periodically upstream them to vLLM main repo. To install latest [HabanaAI/vLLM-fork](https://github.com/HabanaAI/vllm-fork), run the following:
+
+.. code:: console
+
+   $ git clone https://github.com/HabanaAI/vllm-fork.git
+   $ cd vllm-fork
+   $ git checkout habana_main
+   $ pip install -r requirements-hpu.txt
+   $ python setup.py develop
+
+3. Build and Install from vLLM main source
+
+If you prefer to build and install directly from the main vLLM source, where periodically we are upstreaming new features, run the following:
+
+.. code:: console
+
+   $ git clone https://github.com/vllm-project/vllm.git
+   $ cd vllm
+   $ pip install -r requirements-hpu.txt
+   $ python setup.py develop
 
 Supported Features
 ==================
