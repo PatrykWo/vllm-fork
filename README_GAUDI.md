@@ -54,7 +54,7 @@ Currently, we are providing multiple repositories which can be used to install v
 
 #### 1. Build and Install the stable version
 
-Periodically, we are releasing vLLM to allign with Intel® Gaudi® software releases. The stable version is released with a tagg, and supports fully validated features and performance optimizations in Gaudi's [vLLM-fork](https://github.com/HabanaAI/vllm-fork). To install the stable release from [HabanaAI/vLLM-fork](https://github.com/HabanaAI/vllm-fork), run the following:
+Periodically, we are releasing vLLM to allign with Intel® Gaudi® software releases. The stable version is released with a tag, and supports fully validated features and performance optimizations in Gaudi's [vLLM-fork](https://github.com/HabanaAI/vllm-fork). To install the stable release from [HabanaAI/vLLM-fork](https://github.com/HabanaAI/vllm-fork), run the following:
 
 ```{.console}
 $ git clone https://github.com/HabanaAI/vllm-fork.git
