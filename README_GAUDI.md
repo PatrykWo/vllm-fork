@@ -50,7 +50,7 @@ $ docker run -it --runtime=habana -e HABANA_VISIBLE_DEVICES=all -e OMPI_MCA_btl_
 
 ### Build and Install vLLM
 
-Currently, we are providing multiple repositories which can be used to install vLLM with Intel® Gaudi®, pick one option:
+Currently, we are providing multiple ways which can be used to install vLLM with Intel® Gaudi®, pick one option:
 
 #### 1. Build and Install the stable version
 
@@ -75,7 +75,7 @@ $ git checkout habana_main
 $ pip install -r requirements-hpu.txt
 $ python setup.py develop
 ```
-#### 3. Build and Install from vLLM main source
+#### 3. Build and Install from vLLM upstream
 
 If you prefer to build and install directly from the main vLLM source, where periodically we are upstreaming new features, run the following:
 
@@ -138,7 +138,7 @@ Currently in vLLM for HPU we support four execution modes, depending on selected
 | 1                  | 1               | PyTorch lazy mode  |
 
 > [!WARNING] 
-> In 1.19.0, all modes utilizing `PT_HPU_LAZY_MODE=0` are highly experimental and should be only used for validating functional correctness. Their performance will be improved in the next releases. For obtaining the best performance in 1.19.0, please use HPU Graphs, or PyTorch lazy mode.
+> In current release, all modes utilizing `PT_HPU_LAZY_MODE=0` are highly experimental and should be only used for validating functional correctness. Their performance will be improved in the next releases. For obtaining the best performance please use HPU Graphs, or PyTorch lazy mode.
 
 ## Bucketing mechanism
 
